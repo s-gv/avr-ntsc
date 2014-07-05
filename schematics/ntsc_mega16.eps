@@ -1,9 +1,9 @@
 %!PS-Adobe-3.0 EPSF-3.0
 %%Title: ntsc_mega16.eps
 %%Creator: XCircuit v3.7 rev55
-%%CreationDate: Sat Jul  5 14:25:48 2014
+%%CreationDate: Sat Jul  5 14:58:05 2014
 %%Pages: 1
-%%BoundingBox: 68 68 1132 684
+%%BoundingBox: 68 68 1132 696
 %%DocumentNeededResources: font Helvetica Helvetica-Bold Times-Roman Symbol 
 %%EndComments
 %%BeginProlog
@@ -280,7 +280,7 @@ endgate
 %%PageOrientation: Portrait
 /pgsave save def bop
 1.0000 inchscale
-2.6000 setlinewidth 352 822 translate
+2.6000 setlinewidth 352 854 translate
 
 1.000 0 48 704 digital::battery
 (9v) {/Helvetica cf} 2 16 0 1.000 144 720 label
@@ -296,7 +296,7 @@ endgate
 1.000 0 656 912 digital::5V
 1 1.000 544 880 656 880 2 polygon
 0 1.000 208 496 208 -544 704 -544 704 496 4 polygon
-(Atmega16) {/Helvetica-Bold 2.000 cf} 2 16 0 1.000 288 -80 label
+(Atmega16) {/Helvetica-Bold 2.000 cf} 2 16 0 1.000 288 -48 label
 (VCC) {/Helvetica cf} 2 16 0 1.000 224 -224 label
 (AVCC) {/Helvetica cf} 2 16 0 1.000 224 -272 label
 (AREF) {/Helvetica cf} 2 16 0 1.000 224 -320 label
@@ -490,7 +490,22 @@ endgate
 1 1.000 2512 304 2656 304 2 polygon
 1.000 0 2112 336 generic::dot
 (Those pins of Atmega16 not in this schematic may be left floating) 
-{/Helvetica cf} 2 16 0 1.000 192 -624 label
+{/Helvetica cf} 2 16 0 1.000 0 -656 label
+(mosi) {/Helvetica cf} 2 16 0 1.000 608 -112 label
+(miso) {/Helvetica cf} 2 16 0 1.000 608 -160 label
+(sck) {/Helvetica cf} 2 16 0 1.000 624 -208 label
+1 1.000 704 -192 752 -192 2 polygon
+1 1.000 704 -144 752 -144 2 polygon
+1 1.000 704 -96 752 -96 2 polygon
+1.000 0 752 -16 analog::gnd
+1 1.000 752 -96 800 -96 2 polygon
+1 1.000 752 -16 800 -16 2 polygon
+1 1.000 752 -144 800 -144 2 polygon
+1 1.000 752 -192 800 -192 2 polygon
+1 1.000 800 -240 752 -240 752 -576 16 -576 16 80 128 80 6 polygon
+1.000 0 128 80 generic::dot
+0 1.000 800 16 800 -272 864 -272 864 16 4 polygon
+(ISP HEADER) {/Helvetica cf} 2 16 270 1.000 848 -256 label
 pgsave restore showpage
 
 %%Trailer
