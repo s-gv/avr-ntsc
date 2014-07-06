@@ -1,7 +1,7 @@
 %!PS-Adobe-3.0 EPSF-3.0
 %%Title: ntsc_mega16.eps
-%%Creator: XCircuit v3.7 rev55
-%%CreationDate: Sat Jul  5 19:38:07 2014
+%%Creator: XCircuit v3.7 rev26
+%%CreationDate: Sun Jul  6 18:06:01 2014
 %%Pages: 1
 %%BoundingBox: 68 68 1151 702
 %%DocumentNeededResources: font Helvetica Helvetica-Bold Times-Roman Symbol 
@@ -124,7 +124,7 @@
   currentlinewidth mul setlinewidth /style exch def style 2048 and 0 gt
   clipped 1 and 0 eq and {clip newpath /clipped clipped 1 add def} {
   style 1 and 0 gt not {closepath} if
-  style 1024 and 0 gt {2 setlinecap 0 setlinejoin} if
+  style 1024 and 0 gt {2 setlinecap} if
   style 2 and 0 gt {currentlinewidth 4 mul dup 2 array astore 0 setdash} if
   style 4 and 0 gt {0.5 currentlinewidth 4 mul 2 array astore 0 setdash} if
   gsave style 16 and 0 gt { style 224 and -5 bitshift style 256 and 0 gt {
@@ -156,7 +156,7 @@
 /polyc   { {lineto} repeat } bind def
 /beginpath { gsave moveto } bind def
 /endpath { setstyles } bind def
-/bop	 { 1 setlinecap 2 setlinejoin 6 setmiterlimit 0 0 0 scb cRedef
+/bop	 { 1 setlinecap 0 setlinejoin 6 setmiterlimit 0 0 0 scb cRedef
 	/clipped 0 def} def
 /psinsertion {/PSobj save def /showpage {} def /setpagedevice {pop} def bop
 	rotate translate dup scale} def
@@ -352,7 +352,7 @@ endgate
 (QC) {/Helvetica cf} 2 16 0 1.000 1344 624 label
 {/Helvetica cf} 1 16 0 1.000 1360 608 label
 (QD) {/Helvetica cf} 2 16 0 1.000 1344 576 label
-(SHIFT) {/Helvetica cf} 2 16 0 1.000 976 464 label
+(SHIFT/LD) {/Helvetica cf} 2 16 0 1.000 976 464 label
 1.000 90 1664 832 analog::resistor
 (560R) {/Helvetica cf} 2 16 0 1.000 1632 864 label
 1.000 90 1664 720 analog::resistor
