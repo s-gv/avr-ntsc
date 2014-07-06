@@ -13,7 +13,7 @@ ASRCS = $(wildcard $(SRCDIR)/*.S)
 INCS = $(wildcard $(INCDIR)/*.h)
 
 CFLAGS = -mmcu=$(MCU) -O$(OPT) -I$(INCDIR) -Wall -Wstrict-prototypes -funsigned-char -funsigned-bitfields -ffunction-sections -fpack-struct -fshort-enums -std=gnu99 -gdwarf-2
-AFLAGS = -mmcu=$(MCU) -O$(OPT) -I$(INCDIR) -Wall -Wstrict-prototypes -funsigned-char -funsigned-bitfields -ffunction-sections -fpack-struct -fshort-enums -std=gnu99 -gdwarf-2
+AFLAGS = -mmcu=$(MCU) -O$(OPT) -I$(INCDIR) -Wall -std=gnu99 -gdwarf-2
 LFLAGS = -mmcu=$(MCU) -O$(OPT) -Wall -Wstrict-prototypes -funsigned-char -funsigned-bitfields -ffunction-sections -fpack-struct -fshort-enums -std=gnu99 -gdwarf-2
 
 CDEFS = -DF_CPU=$(F_CPU)
@@ -36,10 +36,12 @@ $(AOBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.S $(INCS)
 	$(CC) $(AFLAGS) $(ADEFS) -c $< -o $@
 
 $(BINDIR)/$(TARGET).elf: $(COBJS) $(AOBJS)
+	@echo
 	$(CC) $(CFLAGS) $^ -o $(BINDIR)/$(TARGET).elf
 	$(SIZE) $(BINDIR)/$(TARGET).elf
 
 $(BINDIR)/$(TARGET).hex: $(BINDIR)/$(TARGET).elf
+	@echo
 	avr-objcopy -j .text -j .data -O ihex $(BINDIR)/$(TARGET).elf $(BINDIR)/$(TARGET).hex
 
 clean:
