@@ -1,4 +1,4 @@
-#define F_CPU 14318180UL
+// #define F_CPU 14318180UL // May be needed in AVR Studio
 
 #include<avr/io.h>
 #include<avr/interrupt.h>
