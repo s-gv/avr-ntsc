@@ -13,8 +13,8 @@ How To Use
 ----------
 
 - Build the circuit in `schematics/ntsc_mega16.png`
-- Load the binary file in `hex/NTSC_mega16_Color_Palette.hex` to the flash memory of the Atmega16 in the schematic
+- Load the binary file in `bin/NTSC_mega16_Color_Palette.hex` to the flash memory of the Atmega16 in the schematic
 - Connect the composite video cable to the TV
 - A color palette like the one in `figures/ntsc_mega16_color_palette.png` should be visible on the TV
 
-If you make changes to the source, run `make` in the project root to re-compile the source. The binary file in `hex/` will be updated. Alternatively, create a new project with AVR Studio and import the source files from `src/`.
+If you make changes to the source, run `make` in the project root to re-compile the source. The binary file in `bin/` will be updated. Alternatively, create a new project with AVR Studio and import the source files from `src/`.
