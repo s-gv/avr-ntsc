@@ -1,5 +1,5 @@
 MCU = atmega16 # target MCU
-F_CPU = 14318180UL # CPU Frequency in Hz. Don't end with UL
+F_CPU = 14318180UL # CPU Frequency in Hz.
 OPT = s # Optimization level
 
 SRCDIR = src
