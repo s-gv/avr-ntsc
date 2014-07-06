@@ -14,7 +14,7 @@ DDRA ( 4:7 ) - CHROMA
 
 volatile uint16_t scanline = 0;
 
-inline void correctJitter()
+inline void correctJitter(void)
 {
 	asm("in r16,0x2C"); // get TCNT1L to reg16
 
@@ -80,7 +80,7 @@ ISR(TIMER1_COMPA_vect)
 
 	DDRA = 0xF0;
 }
-int main()
+int main(void)
 {
 	//Video Port
 	DDRA = 0xF0;
