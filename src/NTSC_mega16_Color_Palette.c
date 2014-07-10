@@ -14,47 +14,16 @@ DDRA ( 4:7 ) - CHROMA
 
 volatile uint16_t scanline = 0;
 
-inline void correctJitter(void)
-{
-	asm("in r16,0x2C"); // get TCNT1L to reg16
-
-	asm("subi r16,0x8A");
-
-	asm("cpi r16,1");
-	asm("brlo .");
-	asm("cpi r16,2");
-	asm("brlo .");
-	asm("cpi r16,3");
-	asm("brlo .");
-	asm("cpi r16,4");
-	asm("brlo .");
-	asm("cpi r16,5");
-	asm("brlo .");
-	asm("cpi r16,6");
-	asm("brlo .");
-	asm("cpi r16,7");
-	asm("brlo .");
-	asm("cpi r16,8");
-	asm("brlo .");
-	asm("cpi r16,9");
-	asm("brlo .");
-	asm("cpi r16,10");
-	asm("brlo .");
-	//asm("nop");
-}
-
 ISR(TIMER1_COMPB_vect)
 {
 	scanline++;
 	if(scanline == 248)
 	{
 		OCR1A = 850;
-		ICR1 = 907;
 	}
 	else
 	{
 		OCR1A = 67;
-		ICR1 = 909;
 	}
 	if(scanline == 262)
 		scanline = 0;
@@ -62,22 +31,18 @@ ISR(TIMER1_COMPB_vect)
 ISR(TIMER1_COMPA_vect)
 {
 	DDRA = 0xE0;
-	_delay_us(3);
-
-	correctJitter();
+	_delay_us(4);
+	DDRA = 0xF0;
 
 	if(scanline < 240)
 	{
 		uint16_t i;
-		_delay_us(2);
-	
 		for(i=(scanline - 20)/16;i<256;i+=16)
 		{
 			DDRA = i;
 			_delay_us(2);
 		}
 	}
-
 	DDRA = 0xF0;
 }
 int main(void)
@@ -108,9 +73,7 @@ int main(void)
 		
 	while(1)
 	{
-		asm("nop");
-		asm("nop");
-		asm("nop");
+		asm("sleep");
 	}
 	return 0;
 }
