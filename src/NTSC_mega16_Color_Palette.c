@@ -25,30 +25,27 @@ ISR(TIMER1_COMPB_vect)
 	{
 		OCR1A = 67;
 	}
-	if(scanline == 262)
+	if(scanline == 263)
 		scanline = 0;
 }
 ISR(TIMER1_COMPA_vect)
 {
-	DDRA = 0xE0;
 	_delay_us(4);
-	DDRA = 0xF0;
-
-	if(scanline < 240)
+	if(scanline > 40 && scanline < 220)
 	{
 		uint16_t i;
-		for(i=(scanline - 20)/16;i<256;i+=16)
+		for(i=(scanline - 40)/16;i<256;i+=16)
 		{
-			DDRA = i;
+			DDRA = i; // change color of 'pixels'
 			_delay_us(2);
 		}
 	}
-	DDRA = 0xF0;
+	DDRA = 0xE0; // return to throwing out color burst, even during sync.
 }
 int main(void)
 {
 	//Video Port
-	DDRA = 0xF0;
+	DDRA = 0xE0; // Keep the color burst 'ON' at all times (including sync).
 	PORTA = 0x0F;
 
 	//74LS195
