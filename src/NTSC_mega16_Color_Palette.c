@@ -4,73 +4,85 @@
 #include<avr/interrupt.h>
 #include<util/delay.h>
 #include<inttypes.h>
+#include<avr/sleep.h>
 
-/* 74LS195 Connections
-PD7 - /LD
-
-DDRA (0:3) - LUMA
-DDRA ( 4:7 ) - CHROMA
-*/
-
-volatile uint16_t scanline = 0;
+volatile uint16_t scanline = 0; // scanline will be accessed from ISR. So, make it volatile.
 
 ISR(TIMER1_COMPB_vect)
 {
-	scanline++;
-	if(scanline == 248)
+    // Enter interrupt on every scanline.
+	uint8_t i, luma, chroma;
+    
+    // Start drawing pixels if scanline is visible.
+    if(scanline > 40 && scanline < 220)
 	{
-		OCR1A = 850;
+        luma = (((uint8_t)scanline) >> 4) & 0x0F; // Luma increases from top to bottom of the screen in steps of 16 lines.
+		for(i=0;i<16;i++)
+		{
+            chroma = (i << 4); // Chroma changes from left to right on every scanline.
+			DDRA = chroma | luma; // change color of 'pixels'
+			_delay_us(2);
+		}
+	}
+
+    // Drawing done for this scanline. Return to throwing out color burst (even during sync).
+	DDRA = 0xE0; 
+
+    // Should a long-sync be given to signal V-Sync ?
+	scanline++;
+	if(scanline == 247)
+	{
+		OCR1A = 850; // OCR1A is double buffered. So, the next scanline will be a long-sync
 	}
 	else
 	{
 		OCR1A = 67;
 	}
+
+    // Draw 263 lines per frame. 
 	if(scanline == 263)
+    {
 		scanline = 0;
-}
-ISR(TIMER1_COMPA_vect)
-{
-	_delay_us(4);
-	if(scanline > 40 && scanline < 220)
-	{
-		uint16_t i;
-		for(i=(scanline - 40)/16;i<256;i+=16)
-		{
-			DDRA = i; // change color of 'pixels'
-			_delay_us(2);
-		}
-	}
-	DDRA = 0xE0; // return to throwing out color burst, even during sync.
+    }
 }
 int main(void)
 {
-	//Video Port
+    // Make all unused pins as output
+    DDRB = 0xFF;
+    DDRC = 0xFF;
+    DDRD = 0xFF;
+
+	//Video Port: (DDRA (0:3) - LUMA), (DDRA (4:7) - CHROMA)
 	DDRA = 0xE0; // Keep the color burst 'ON' at all times (including sync).
-	PORTA = 0x0F;
+	PORTA = 0x0F; // Luma bits are kept high while chroma bits are kept low.
 
-	//74LS195
-	DDRD |= _BV(7);
-	PORTD &= ~(_BV(7));
-	_delay_ms(10);
-	PORTD |= _BV(7);
-
-	//Timer
-	DDRD |= _BV(5); // C-Sync pin
-
-	TCCR1A |= _BV(7) | _BV(6) | _BV(1); // TOP-ICR1 , fast PWM, set on OCR1A match
-	TCCR1B |= _BV(4) | _BV(3);
-	TCNT1 = 0;
-	OCR1A = 62; // short sync.
-	OCR1B = 1; 
-	ICR1 = 909; // H-line length = 63.55555uS
-	TIMSK |= _BV(4) | _BV(3); // interrupt on COMPA and COMPB
-	
+	//Shift register 
+	DDRD |= (1 << 7); // PD7 is connected to the SHIFT/LD pin. Make PD7 output pin.
+	PORTD &= ~(1 << 7); // put register into load mode to parallel load "1100".
+	_delay_ms(10); // wait for a while
+	PORTD |= (1 << 7); // put register back to shift mode
+    
+    // Setup sleep mode
+    set_sleep_mode(SLEEP_MODE_IDLE);
+    sleep_enable(); // Enable sleep mode (this does not put the MCU to sleep right now).
+    
+	//Timer/PWM config
+	DDRD |= (1 << 5); // C-Sync pin direction should be output
+    TCCR1A |= (1 << 7) | (1 << 6) | (1 << 1); // TOP-ICR1 , fast PWM, set on OCR1A match
+    TCCR1B |= (1 << 4) | (1 << 3);
+	TCNT1 = 0; // timer value made 0
+	OCR1A = 67; // short sync for about 4.7 uS
+	OCR1B = 150; // Enter interrupt after sync to start drawing pixels
+	ICR1 = 909; // Timer Top Value = H-line length = 63.55555uS
+	TIMSK |= (1 << 3); // interrupt on COMPB
 	TCCR1B |= 1;//start timer, no prescale.
+
+    // Global interrupt enable
 	sei();
-		
+
 	while(1)
 	{
-		asm("sleep");
+        sleep_cpu(); // To avoid ISR entry time jitter because of variable interrupt latency, always enter ISR from sleep mode.
 	}
 	return 0;
 }
