@@ -42,7 +42,7 @@ ISR(TIMER1_COMPB_vect)
         for (chroma = 0; chroma < 16; chroma++) // Chroma changes from left to right on every scanline.
         {
             DDRA = (chroma << 4) | luma; // change color of 'pixels'.
-            _delay_us(2);
+            _delay_us(1.5);
         }
     }
 
