@@ -18,7 +18,7 @@
    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
-   */
+*/
 
 // #define F_CPU 14318180UL
 
@@ -33,16 +33,15 @@ volatile uint16_t scanline = 0; // scanline will be accessed from ISR. So, make 
 ISR(TIMER1_COMPB_vect)
 {
     // Enter interrupt on every scanline.
-    uint8_t i, luma, chroma;
+    uint8_t luma, chroma;
 
     // Start drawing pixels if scanline is visible.
     if(scanline > 40 && scanline < 220)
     {
         luma = (((uint8_t)scanline) >> 4) & 0x0F; // Luma increases from top to bottom of the screen.
-        for(i=0;i<16;i++)
+        for (chroma = 0; chroma < 16; chroma++) // Chroma changes from left to right on every scanline.
         {
-            chroma = (i << 4); // Chroma changes from left to right on every scanline.
-            DDRA = chroma | luma; // change color of 'pixels'
+            DDRA = (chroma << 4) | luma; // change color of 'pixels'
             _delay_us(2);
         }
     }
