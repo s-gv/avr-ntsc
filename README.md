@@ -14,6 +14,7 @@ How To Use
 
 - Build the circuit in `schematics/ntsc_mega16.png`
 - Load the binary file in `bin/NTSC_mega16.hex` to the flash memory of the Atmega16 in the schematic
+- Program the CKOPT fuse to enable full-swing crystal oscillator (make CKOPT=0). See the Makefile for suggested fuse bits.
 - Connect the composite video cable to the TV
 - A color palette like the one in `figures/ntsc_mega16_color_palette.png` should be visible on the TV
 
