@@ -1,5 +1,5 @@
-ntsc-atmega16
-=============
+ntsc-avr
+========
 
 Generate NTSC Color video using Atmel's Atmega16 8-bit microcontroller.
 
