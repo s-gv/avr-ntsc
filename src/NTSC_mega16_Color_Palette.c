@@ -106,10 +106,11 @@ int main(void)
         sleep_cpu(); // To avoid ISR entry time jitter because of variable interrupt service latency, always enter ISR from sleep mode.
 
         /* If some work has to be done here (rather than sleeping), then
-         * the ISR entry jitter has to cancelled in the ISR. The idea is
-         * to read the timer in the ISR and if the ISR has been entered
-         * "early", some cycles are wasted so that line drawing always starts
-         * at the same time regardless of the ISR entry latency.
+         * the ISR entry jitter has to be cancelled in the ISR. The idea is
+         * to read the timer in the ISR, and if the ISR has been entered
+         * early, some cycles are wasted so that line drawing always starts
+         * at the same time with respect to the sync tip on every scanline 
+         * regardless of the ISR entry latency.
          *
          * Example ISR code to do this:
         void correctJitter()
@@ -118,8 +119,8 @@ int main(void)
             asm("subi r16,MIN_POSSIBLE_TCNT1L_AT_THIS_POINT");
             
             // If TCNT1L is small enough (ISR entered early), waste a cycle by 
-            // branching (which takes 2 cycles) to the next instruction instead of 
-            // sliding to the next instruction without branch (which takes 1 cycle).
+            // branching to the next instruction (which takes 2 cycles) instead of 
+            // sliding to the next instruction without a branch (which takes 1 cycle).
 
             asm("cpi r16,1"); 
             asm("brlo .");  
