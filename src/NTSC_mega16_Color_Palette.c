@@ -40,6 +40,7 @@
 #define SHORT_SYNC_DURATION 67
 #define LINE_LENGTH 909
 #define HALF_LINE_LENGTH 454
+#define VIDEO_INTERRUPT_ENTRY_POINT 150
 
 volatile uint16_t scanline = 1; // scanline will be accessed from ISR. So, make it volatile.
 volatile uint8_t fieldline = 1;
@@ -140,7 +141,7 @@ int main(void)
     TCCR1B |= (1 << 4) | (1 << 3);
     TCNT1 = 0; // timer value made 0.
     OCR1A = SHORT_SYNC_DURATION; // short sync for about 4.7 uS.
-    OCR1B = 150; // Enter interrupt after sync to start drawing pixels.
+    OCR1B = VIDEO_INTERRUPT_ENTRY_POINT; // Enter interrupt after sync to start drawing pixels.
     ICR1 = LINE_LENGTH; // Timer Top Value = H-line length = 63.55555uS.
     TIMSK |= (1 << 3); // interrupt on COMPB.
     TCCR1B |= 1;//start timer, no prescale.
