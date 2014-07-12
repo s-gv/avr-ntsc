@@ -21,6 +21,7 @@
 */
 
 // #define F_CPU 14318180UL
+#define INTERLACED
 
 #include<avr/io.h>
 #include<avr/interrupt.h>
@@ -28,17 +29,26 @@
 #include<inttypes.h>
 #include<avr/sleep.h>
 
-volatile uint16_t scanline = 0; // scanline will be accessed from ISR. So, make it volatile.
+#define LONG_SYNC_CONST 850
+#define SHORT_SYNC_CONST 67
+
+volatile uint16_t scanline = 1; // scanline will be accessed from ISR. So, make it volatile.
+volatile uint8_t fieldline = 1;
+
+#ifdef INTERLACED
+volatile uint8_t halfLineBit = 0;
+#endif
 
 ISR(TIMER1_COMPB_vect)
 {
     // Enter interrupt on every scanline.
-    uint8_t luma, chroma;
-
+    uint8_t luma, chroma, line;
+    
+    line = fieldline;
     // Start drawing pixels if scanline is visible.
-    if(scanline > 40 && scanline < 220)
+    if(line > 40 && line < 240)
     {
-        luma = (((uint8_t)scanline) >> 4) & 0x0F; // Luma increases from top to bottom of the screen.
+        luma = ((line >> 4) & 0x0F); // Luma increases from top to bottom of the screen.
         for (chroma = 0; chroma < 16; chroma++) // Chroma changes from left to right on every scanline.
         {
             DDRA = (chroma << 4) | luma; // change color of 'pixels'.
@@ -49,22 +59,47 @@ ISR(TIMER1_COMPB_vect)
     // Drawing done for this scanline. Return to throwing out color burst (even during sync).
     DDRA = 0xE0; 
 
-    // Should a long-sync be given to signal V-Sync ?
-    scanline++;
-    if(scanline == 247)
+#ifdef INTERLACED
+    if(scanline == 263)
+        ICR1 = 454; // 227.5/2 sub-carrier cycles per line
+    else
+        ICR1 = 909; // 227.5 sub-carrier cycles per line
+    OCR1A = SHORT_SYNC_CONST; // Next line will be a short sync unless the following conditions are met.
+    if(scanline != 263)
     {
-        OCR1A = 850; // OCR1A is double buffered. So, the next scanline will be a long-sync.
+        scanline++;
+        if(scanline > 525)
+        {
+            scanline = 1;
+            OCR1A = LONG_SYNC_CONST; // Next line, i.e., scanline==1, will be a long sync (v-sync) since OCR1A is double buffered
+        }
     }
     else
     {
-        OCR1A = 67;
+        if(halfLineBit == 1)
+        {
+            scanline++;
+            OCR1A = LONG_SYNC_CONST; // Next line, i.e., scanline==264, will be a long sync (v-sync) since OCR1A is double buffered
+        }
+        halfLineBit ^= 1; 
     }
-
+    fieldline = (uint8_t)scanline;
+    if(scanline > 263)
+        fieldline = (uint8_t) (scanline - 263);
+#else
+    // Should a long-sync be given to signal V-Sync ?
+    scanline++;
     // Draw 263 lines per frame. 
-    if(scanline == 263)
+    OCR1A = SHORT_SYNC_CONST;
+    if(scanline > 263)
     {
-        scanline = 0;
+        scanline = 1;
+        OCR1A = LONG_SYNC_CONST; // Next line, i.e., scanline==1, will be a long sync (v-sync) since OCR1A is double buffered
     }
+    fieldline = (uint8_t)scanline;
+    if(scanline > 262)
+        fieldline = 0;
+#endif
 }
 int main(void)
 {
@@ -92,7 +127,7 @@ int main(void)
     TCCR1A |= (1 << 7) | (1 << 6) | (1 << 1); // TOP-ICR1 , fast PWM, set PWM pin on OCR1A match.
     TCCR1B |= (1 << 4) | (1 << 3);
     TCNT1 = 0; // timer value made 0.
-    OCR1A = 67; // short sync for about 4.7 uS.
+    OCR1A = SHORT_SYNC_CONST; // short sync for about 4.7 uS.
     OCR1B = 150; // Enter interrupt after sync to start drawing pixels.
     ICR1 = 909; // Timer Top Value = H-line length = 63.55555uS.
     TIMSK |= (1 << 3); // interrupt on COMPB.
