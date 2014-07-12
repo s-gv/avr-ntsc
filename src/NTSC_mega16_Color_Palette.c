@@ -29,7 +29,7 @@
 #include<inttypes.h>
 #include<avr/sleep.h>
 
-#define LONG_SYNC_CONST 850
+#define LONG_SYNC_CONST 420
 #define SHORT_SYNC_CONST 67
 
 volatile uint16_t scanline = 1; // scanline will be accessed from ISR. So, make it volatile.
@@ -45,8 +45,8 @@ ISR(TIMER1_COMPB_vect)
     uint8_t luma, chroma, line;
     
     line = fieldline;
-    // Start drawing pixels if scanline is visible.
-    if(line > 40 && line < 240)
+    // Start drawing pixels if scanline is visible (lines 21 through 260 are supposed to be visible).
+    if(line > 20 && line < 261)
     {
         luma = ((line >> 4) & 0x0F); // Luma increases from top to bottom of the screen.
         for (chroma = 0; chroma < 16; chroma++) // Chroma changes from left to right on every scanline.
@@ -79,13 +79,16 @@ ISR(TIMER1_COMPB_vect)
         if(halfLineBit == 1)
         {
             scanline++;
-            OCR1A = LONG_SYNC_CONST; // Next line, i.e., scanline==264, will be a long sync (v-sync) since OCR1A is double buffered
+        }
+        else 
+        {
+            OCR1A = LONG_SYNC_CONST; // Next half line, i.e., scanline==263.5, will be a long sync (v-sync) since OCR1A is double buffered
         }
         halfLineBit ^= 1; 
     }
     fieldline = (uint8_t)scanline;
-    if(scanline > 263)
-        fieldline = (uint8_t) (scanline - 263);
+    if(scanline > 262)
+        fieldline = (uint8_t) (scanline - 262);
 #else
     // Should a long-sync be given to signal V-Sync ?
     scanline++;
