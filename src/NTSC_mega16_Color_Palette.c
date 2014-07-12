@@ -21,6 +21,13 @@
 */
 
 // #define F_CPU 14318180UL
+
+// Comment out the following #define statement enable "fake-progressive" scan
+// in which only the odd field is drawn and the even field is left blank.
+// "fake-progressive" looks better on CRT TVs because of the higher frame rate.
+// Interlaced mode looks better on newer digital Flat Screen TVs because
+// comb filters that these TVs have expect an interlaced signal and interact poorly 
+// with the "fake-progressive" signal.
 #define INTERLACED
 
 #include<avr/io.h>
@@ -29,8 +36,11 @@
 #include<inttypes.h>
 #include<avr/sleep.h>
 
-#define LONG_SYNC_CONST 420
-#define SHORT_SYNC_CONST 67
+#define LONG_SYNC_DURATION 420
+#define SHORT_SYNC_DURATION 67
+#define LINE_LENGTH 909
+#define HALF_LINE_LENGTH 454
+#define VIDEO_INTERRUPT_ENTRY_POINT 150
 
 volatile uint16_t scanline = 1; // scanline will be accessed from ISR. So, make it volatile.
 volatile uint8_t fieldline = 1;
@@ -61,17 +71,17 @@ ISR(TIMER1_COMPB_vect)
 
 #ifdef INTERLACED
     if(scanline == 263)
-        ICR1 = 454; // 227.5/2 sub-carrier cycles per line
+        ICR1 = HALF_LINE_LENGTH; // 227.5/2 sub-carrier cycles per line
     else
-        ICR1 = 909; // 227.5 sub-carrier cycles per line
-    OCR1A = SHORT_SYNC_CONST; // Next line will be a short sync unless the following conditions are met.
+        ICR1 = LINE_LENGTH; // 227.5 sub-carrier cycles per line
+    OCR1A = SHORT_SYNC_DURATION; // Next line will be a short sync unless the following conditions are met.
     if(scanline != 263)
     {
         scanline++;
         if(scanline > 525)
         {
             scanline = 1;
-            OCR1A = LONG_SYNC_CONST; // Next line, i.e., scanline==1, will be a long sync (v-sync) since OCR1A is double buffered
+            OCR1A = LONG_SYNC_DURATION; // Next line, i.e., scanline==1, will be a long sync (v-sync) since OCR1A is double buffered
         }
     }
     else
@@ -82,7 +92,7 @@ ISR(TIMER1_COMPB_vect)
         }
         else 
         {
-            OCR1A = LONG_SYNC_CONST; // Next half line, i.e., scanline==263.5, will be a long sync (v-sync) since OCR1A is double buffered
+            OCR1A = LONG_SYNC_DURATION; // Next half line, i.e., scanline==263.5, will be a long sync (v-sync) since OCR1A is double buffered
         }
         halfLineBit ^= 1; 
     }
@@ -93,11 +103,11 @@ ISR(TIMER1_COMPB_vect)
     // Should a long-sync be given to signal V-Sync ?
     scanline++;
     // Draw 263 lines per frame. 
-    OCR1A = SHORT_SYNC_CONST;
+    OCR1A = SHORT_SYNC_DURATION;
     if(scanline > 263)
     {
         scanline = 1;
-        OCR1A = LONG_SYNC_CONST; // Next line, i.e., scanline==1, will be a long sync (v-sync) since OCR1A is double buffered
+        OCR1A = LONG_SYNC_DURATION; // Next line, i.e., scanline==1, will be a long sync (v-sync) since OCR1A is double buffered
     }
     fieldline = (uint8_t)scanline;
     if(scanline > 262)
@@ -130,9 +140,9 @@ int main(void)
     TCCR1A |= (1 << 7) | (1 << 6) | (1 << 1); // TOP-ICR1 , fast PWM, set PWM pin on OCR1A match.
     TCCR1B |= (1 << 4) | (1 << 3);
     TCNT1 = 0; // timer value made 0.
-    OCR1A = SHORT_SYNC_CONST; // short sync for about 4.7 uS.
-    OCR1B = 150; // Enter interrupt after sync to start drawing pixels.
-    ICR1 = 909; // Timer Top Value = H-line length = 63.55555uS.
+    OCR1A = SHORT_SYNC_DURATION; // short sync for about 4.7 uS.
+    OCR1B = VIDEO_INTERRUPT_ENTRY_POINT; // Enter interrupt after sync to start drawing pixels.
+    ICR1 = LINE_LENGTH; // Timer Top Value = H-line length = 63.55555uS.
     TIMSK |= (1 << 3); // interrupt on COMPB.
     TCCR1B |= 1;//start timer, no prescale.
 
