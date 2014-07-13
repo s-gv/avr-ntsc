@@ -22,7 +22,7 @@
 
 // #define F_CPU 14318180UL
 
-// Comment out the following #define statement enable "fake-progressive" scan
+// Comment out the following #define statement to enable "fake-progressive" scan
 // in which only the odd field is drawn and the even field is left blank.
 // "fake-progressive" looks better on CRT TVs because of the higher frame rate.
 // Interlaced mode looks better on newer digital Flat Screen TVs because
