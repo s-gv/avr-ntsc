@@ -1,7 +1,7 @@
 ntsc-avr
 ========
 
-Generate NTSC Color video using Atmel's Atmega16 8-bit microcontroller.
+Generate NTSC Color video using Atmel's Atmega16 8-bit microcontroller. A discussion of [NTSC implementation](http://sagargv.blogspot.in/2014/07/ntsc-demystified-color-demo-with.html) using microcontrollers is on my [blog](http://sagargv.blogspot.in/).
 
 Software Dependencies
 ---------------------
